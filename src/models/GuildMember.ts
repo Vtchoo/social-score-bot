@@ -10,6 +10,8 @@ class User {
     @PrimaryColumn() guildId: string
     @Column() name: string
     @Column() role: UserRole
+
+    @Column() score: number
 }
 
 export { User }
