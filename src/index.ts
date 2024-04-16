@@ -6,6 +6,7 @@ import { ICommand } from './types'
 import createConnection from './database'
 import bot from './core/Bot'
 import { format } from 'date-fns'
+import DefaultMessageHandler from './handlers/DefaultMessageHandler'
 
 async function startClient() {
 
@@ -16,6 +17,8 @@ async function startClient() {
     const client = new Client({
         intents: [
             GatewayIntentBits.Guilds,
+            GatewayIntentBits.GuildMessages,
+            GatewayIntentBits.MessageContent,
         ]
     })
     
@@ -76,6 +79,23 @@ async function startClient() {
                     embeds: [embed]
                 })
             }
+        }
+    })
+
+    const messageHandler = new DefaultMessageHandler()
+    
+    client.on(Events.MessageCreate, async (message) => {
+        if (message.author.bot)
+            return
+
+        if (!message.inGuild())
+            return
+
+        try {
+            await messageHandler.execute({ client, message })
+            return
+        } catch (error) {
+            console.log(error)
         }
     })
     
