@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, Client, ChatInputCommandInteraction } from 'discord.js'
+import { SlashCommandBuilder, Client, ChatInputCommandInteraction, Message } from 'discord.js'
 
 interface CommandHandlerParams {
     client: Client
@@ -10,4 +10,13 @@ interface ICommand {
     execute(params: CommandHandlerParams): Promise<void>
 }
 
-export { ICommand, CommandHandlerParams }
+interface MessageHandlerContext {
+    client: Client
+    message: Message<true>
+}
+
+interface IMessageHandler {
+    execute(context: MessageHandlerContext): Promise<void>
+}
+
+export { ICommand, CommandHandlerParams, IMessageHandler, MessageHandlerContext }
