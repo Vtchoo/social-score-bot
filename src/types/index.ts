@@ -1,12 +1,14 @@
-import { SlashCommandBuilder, Client, ChatInputCommandInteraction, Message } from 'discord.js'
+import { SlashCommandBuilder, Client, ChatInputCommandInteraction, Message, RESTPostAPIChatInputApplicationCommandsJSONBody, REST } from 'discord.js'
 
 interface CommandHandlerParams {
     client: Client
-    interaction: ChatInputCommandInteraction<'cached'>
+    interaction: ChatInputCommandInteraction
 }
 
+export type ExtendedChatInputCommandInteraction = RESTPostAPIChatInputApplicationCommandsJSONBody & { contexts: number[], integration_types: number[] }
+
 interface ICommand {
-    definition: SlashCommandBuilder
+    definition: SlashCommandBuilder | ExtendedChatInputCommandInteraction
     execute(params: CommandHandlerParams): Promise<void>
 }
 

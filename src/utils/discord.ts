@@ -6,7 +6,7 @@ export interface SendMessageOptions {
     thumbnail?: string
 }
 
-export async function sendMessage(interaction: ChatInputCommandInteraction<'cached'>, { title, description, thumbnail }: SendMessageOptions) {
+export async function sendMessage(interaction: ChatInputCommandInteraction, { title, description, thumbnail }: SendMessageOptions) {
     const embed = new EmbedBuilder()
         .setTitle(title || null)
         .setDescription(description || null)

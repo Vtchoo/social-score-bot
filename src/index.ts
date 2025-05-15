@@ -46,10 +46,10 @@ async function startClient() {
         if (interaction.isChatInputCommand()) {
 
             try {
-                if (!interaction.inCachedGuild()) {
-                    await interaction.reply('Invalid guild (?)')
-                    return
-                }
+                // if (!interaction.inCachedGuild()) {
+                //     await interaction.reply('Invalid guild (?)')
+                //     return
+                // }
     
                 const slashcmd = slashCommands.get(interaction.commandName)
                 if (!slashcmd) {
@@ -57,9 +57,9 @@ async function startClient() {
                     return
                 }
 
-                const user = interaction.member.displayName || interaction.member.nickname
+                const user = interaction.inCachedGuild() ? interaction.member.displayName || interaction.member.nickname : interaction.user.username
                 const subCommand = interaction.options.getSubcommand(false) || ''
-                console.log(`[${format(new Date(), 'dd/MM/yyyy HH:mm:ss')}] ${user} - /${interaction.commandName} ${subCommand} [Guild: ${interaction.guild.name}]`)
+                console.log(`[${format(new Date(), 'dd/MM/yyyy HH:mm:ss')}] ${user} - /${interaction.commandName} ${subCommand} ${interaction.inCachedGuild() && `[Guild: ${interaction.guild.name}]` || ''}`)
                     
                 // await interaction.deferReply()
                 await slashcmd.execute({ client, interaction })

@@ -11,6 +11,13 @@ interface GetUserScoreContext {
     requestedBy: GuildMember
 }
 
+interface GetUserHistoryContext {
+    requestedBy: GuildMember
+    page: number
+    pageSize: number
+    global?: boolean
+}
+
 export class UserNotFoundError extends Error {
     constructor() {
         super('User not found')
@@ -121,7 +128,7 @@ class Bot {
         }
     }
 
-    async getUserScore(userId: string, guildId: string, context: GetUserScoreContext) {
+    async getUserScore(userId: string, guildId: string | undefined, context: GetUserScoreContext) {
 
         const repository = getUsersRepository()
 
@@ -142,6 +149,46 @@ class Bot {
         }
 
     }
+
+    async getUserHistory(userId: string, guildId: string, context: GetUserHistoryContext) {
+    
+        const { requestedBy, page, pageSize, global } = context
+
+        const repository = getMessageScoresRepository()
+
+        const [messages, totalCount] = await repository.findAndCount({
+            where: { userId, guildId: context.global ? undefined : guildId },
+            order: { createdAt: 'DESC' },
+            skip: (page - 1) * pageSize,
+            take: pageSize
+        })
+
+        return {
+            totalPages: Math.ceil(totalCount / pageSize),
+            count: messages.length,
+            messages
+        }
+    }
+
+    async getLeaderboard(guildId: string, page: number, pageSize: number) {
+
+        const repository = getUsersRepository()
+
+        const [results, totalCount] = await repository.findAndCount({
+            where: { guildId },
+            order: { score: 'DESC' },
+            skip: (page - 1) * pageSize,
+            take: pageSize
+        })
+
+        return {
+            totalPages: Math.ceil(totalCount / pageSize),
+            totalResults: totalCount,
+            count: results.length,
+            results
+        }
+    }
+
 }
 
 const bot = new Bot()

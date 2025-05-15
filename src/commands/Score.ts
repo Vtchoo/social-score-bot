@@ -1,5 +1,5 @@
-import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js'
-import { CommandHandlerParams, ICommand } from '../types'
+import { ApplicationCommandOptionType, ChatInputCommandInteraction, EmbedBuilder, RESTPostAPIChatInputApplicationCommandsJSONBody, SlashCommandBuilder, userMention } from 'discord.js'
+import { CommandHandlerParams, ExtendedChatInputCommandInteraction, ICommand } from '../types'
 import bot, { UserNotFoundError } from '../core/Bot'
 import { sendMessage } from '../utils/discord'
 
@@ -19,22 +19,28 @@ class ScoreCommand implements ICommand {
         .setDescription('Get the score of a user')
     
     async execute({ client, interaction }: CommandHandlerParams) {
-
-        const guildMember = interaction.options.getMember('user') || interaction.member
-
-        const global = interaction.options.getBoolean('global') || false
         
-        if (global && guildMember.id !== interaction.member.id)
-            return await sendMessage(interaction, { description: 'You can only get your own global score' })
+        const global = interaction.options.getBoolean('global') || false
 
         if (!interaction.deferred)
             await interaction.deferReply({ ephemeral: global })
+
+        if (!interaction.inCachedGuild())
+            return await sendMessage(interaction, { description: 'Invalid guild (?)' })
+
+        const guildMember = interaction.options.getMember('user') || interaction.member
+        
+        if (global && guildMember.id !== interaction.member.id)
+            return await sendMessage(interaction, { description: 'You can only get your own global score' })
 
         try {
 
             const score = await bot.getUserScore(guildMember.id, interaction.guildId, { requestedBy: interaction.member })
 
             let title = `**${guildMember.displayName}** has a social credit score of _**${score.score}**_`
+
+            // Mention the user
+            // let title = `${userMention(guildMember.id)} has a social credit score of _**${score.score}**_`
 
             if (global && score.globalScore)
                 title += `\nGlobal score: _**${score.globalScore}**_`
